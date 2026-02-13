@@ -30,10 +30,8 @@ class HardLintInstaller:
     def _setup_pre_commit_hooks(self) -> None:
         self.hooks_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create .gitignore in .hardlint
         (self.pre_commit_dir / ".gitignore").write_text("*")
 
-        # Create pre-commit hook using poetry run
         pre_commit_content = (
             "#!/bin/sh\n"
             'cd "$(git rev-parse --show-toplevel)"\n'
@@ -45,7 +43,6 @@ class HardLintInstaller:
         pre_commit_path.write_text(pre_commit_content)
         pre_commit_path.chmod(0o755)
 
-        # Create commit-msg hook
         commit_msg_content = (
             "#!/bin/sh\n"
             'cd "$(git rev-parse --show-toplevel)"\n'
@@ -73,19 +70,16 @@ class HardLintInstaller:
     def _ensure_pyproject_config(self) -> None:
         pyproject_content = self.pyproject_path.read_text()
 
-        # Check if tool.ruff exists
         if "[tool.ruff]" not in pyproject_content:
             pyproject_content += "\n[tool.ruff]\n"
             pyproject_content += "line-length = 100\n"
             pyproject_content += 'target-version = "py310"\n'
             pyproject_content += 'select = ["E", "F", "W", "I", "N", "C", "B"]\n'
 
-        # Check if tool.black exists
         if "[tool.black]" not in pyproject_content:
             pyproject_content += "\n[tool.black]\n"
             pyproject_content += "line-length = 100\n"
 
-        # Check if tool.isort exists
         if "[tool.isort]" not in pyproject_content:
             pyproject_content += "\n[tool.isort]\n"
             pyproject_content += 'profile = "black"\n'
