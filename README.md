@@ -48,7 +48,8 @@ Hooks are created in `.hardlint/_/`:
   - Fixes issues with `ruff check --fix`
   - Formats with `black`
   - Sorts imports with `isort`
-  - Validates no comments exist (using custom script)
+  - Validates no comments exist
+  - Validates no print statements exist
 
 - **commit-msg**: Validates commit messages
   - Must follow Conventional Commits format
