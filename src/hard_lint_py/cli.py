@@ -1,5 +1,3 @@
-"""Command-line interface for hard-lint-py."""
-
 import sys
 from pathlib import Path
 
@@ -7,7 +5,6 @@ from hard_lint_py.installer import HardLintInstaller
 
 
 def main() -> int:
-    """Main entry point for hard-lint-py CLI."""
     try:
         installer = HardLintInstaller(Path.cwd())
         installer.install()

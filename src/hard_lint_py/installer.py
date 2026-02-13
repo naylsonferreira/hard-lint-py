@@ -1,14 +1,9 @@
-"""Installation and setup of pre-commit hooks and linting configuration."""
-
 import subprocess
 from pathlib import Path
 
 
 class HardLintInstaller:
-    """Installs hard-lint configuration and pre-commit hooks."""
-
     def __init__(self, project_root: Path):
-        """Initialize the installer."""
         self.project_root = project_root
         self.git_dir = project_root / ".git"
         self.pre_commit_dir = project_root / ".hardlint"
@@ -16,7 +11,6 @@ class HardLintInstaller:
         self.pyproject_path = project_root / "pyproject.toml"
 
     def install(self) -> None:
-        """Run the complete installation."""
         print("[INFO] Hard-Lint for Python Installation")
         print(f"[INFO] Project root: {self.project_root}\n")
 
@@ -41,15 +35,12 @@ class HardLintInstaller:
         print('  git add .\n  git commit -m "feat: your message"\n')
 
     def _check_git_repo(self) -> bool:
-        """Check if project is a Git repository."""
         return self.git_dir.exists()
 
     def _check_pyproject(self) -> bool:
-        """Check if pyproject.toml exists."""
         return self.pyproject_path.exists()
 
     def _setup_pre_commit_hooks(self) -> None:
-        """Set up pre-commit and commit-msg hooks."""
         print("[...] Setting up hooks in .hardlint...")
 
         # Create directories
@@ -87,7 +78,6 @@ class HardLintInstaller:
         print("[OK] commit-msg hook created\n")
 
     def _configure_git_hooks_path(self) -> None:
-        """Configure Git to use .hardlint directory for hooks."""
         print("[...] Configuring Git hooks path...")
         try:
             subprocess.run(
@@ -101,7 +91,6 @@ class HardLintInstaller:
             raise RuntimeError(f"Failed to configure Git: {e.stderr.decode()}") from e
 
     def _ensure_pyproject_config(self) -> None:
-        """Ensure pyproject.toml has required linting configuration."""
         print("[...] Ensuring pyproject.toml configuration...")
 
         pyproject_content = self.pyproject_path.read_text()
