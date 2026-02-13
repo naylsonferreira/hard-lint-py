@@ -49,7 +49,6 @@ Hooks are created in `.hardlint/_/`:
   - Formats with `black`
   - Sorts imports with `isort`
   - Validates no comments exist
-  - Validates no print statements exist
 
 - **commit-msg**: Validates commit messages
   - Must follow Conventional Commits format
