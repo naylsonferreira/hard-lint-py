@@ -3,5 +3,4 @@ __author__ = "Naylson Ferreira"
 
 from hard_lint_py.cli import main
 
-
 __all__ = ["main"]
