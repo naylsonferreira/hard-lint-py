@@ -37,7 +37,8 @@ class HardLintInstaller:
             'cd "$(git rev-parse --show-toplevel)"\n'
             "poetry run ruff check . --fix && "
             "poetry run black . --quiet && "
-            "poetry run isort . --quiet\n"
+            "poetry run isort . --quiet && "
+            "python scripts/validate-no-comments.py\n"
         )
         pre_commit_path = self.hooks_dir / "pre-commit"
         pre_commit_path.write_text(pre_commit_content)
