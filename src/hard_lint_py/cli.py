@@ -9,8 +9,7 @@ def main() -> int:
         installer = HardLintInstaller(Path.cwd())
         installer.install()
         return 0
-    except Exception as e:
-        print(f"[ERROR] {e!s}", file=sys.stderr)
+    except Exception:
         return 1
 
 

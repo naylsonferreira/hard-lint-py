@@ -11,28 +11,15 @@ class HardLintInstaller:
         self.pyproject_path = project_root / "pyproject.toml"
 
     def install(self) -> None:
-        print("[INFO] Hard-Lint for Python Installation")
-        print(f"[INFO] Project root: {self.project_root}\n")
-
         if not self._check_git_repo():
             raise RuntimeError("Not a Git repository. Initialize Git first with: git init")
 
         if not self._check_pyproject():
             raise RuntimeError("pyproject.toml not found in project root")
 
-        print("[OK] Git repository detected")
-        print("[OK] pyproject.toml found\n")
-
         self._setup_pre_commit_hooks()
         self._configure_git_hooks_path()
         self._ensure_pyproject_config()
-
-        print("\n[SUCCESS] Hard-Lint installation complete!")
-        print("[INFO] Git hooks are now active in .hardlint/")
-        print("[INFO] Pre-commit will validate code before commits")
-        print("[INFO] Commit messages must follow Conventional Commits format")
-        print("\n[NEXT] Make your first commit to test:")
-        print('  git add .\n  git commit -m "feat: your message"\n')
 
     def _check_git_repo(self) -> bool:
         return self.git_dir.exists()
@@ -41,9 +28,6 @@ class HardLintInstaller:
         return self.pyproject_path.exists()
 
     def _setup_pre_commit_hooks(self) -> None:
-        print("[...] Setting up hooks in .hardlint...")
-
-        # Create directories
         self.hooks_dir.mkdir(parents=True, exist_ok=True)
 
         # Create .gitignore in .hardlint
@@ -60,7 +44,6 @@ class HardLintInstaller:
         pre_commit_path = self.hooks_dir / "pre-commit"
         pre_commit_path.write_text(pre_commit_content)
         pre_commit_path.chmod(0o755)
-        print("[OK] pre-commit hook created")
 
         # Create commit-msg hook
         commit_msg_content = (
@@ -75,10 +58,8 @@ class HardLintInstaller:
         commit_msg_path = self.hooks_dir / "commit-msg"
         commit_msg_path.write_text(commit_msg_content)
         commit_msg_path.chmod(0o755)
-        print("[OK] commit-msg hook created\n")
 
     def _configure_git_hooks_path(self) -> None:
-        print("[...] Configuring Git hooks path...")
         try:
             subprocess.run(
                 ["git", "config", "core.hooksPath", ".hardlint/_"],
@@ -86,13 +67,10 @@ class HardLintInstaller:
                 check=True,
                 capture_output=True,
             )
-            print("[OK] Git configured to use .hardlint/\n")
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to configure Git: {e.stderr.decode()}") from e
 
     def _ensure_pyproject_config(self) -> None:
-        print("[...] Ensuring pyproject.toml configuration...")
-
         pyproject_content = self.pyproject_path.read_text()
 
         # Check if tool.ruff exists
@@ -114,4 +92,3 @@ class HardLintInstaller:
             pyproject_content += "line_length = 100\n"
 
         self.pyproject_path.write_text(pyproject_content)
-        print("[OK] pyproject.toml configuration ensured\n")
