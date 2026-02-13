@@ -52,36 +52,58 @@ mypy = "^1.5.0"
 [tool.black]
 line-length = 100
 target-version = ["py310", "py311", "py312"]
+preview = true
 
 [tool.isort]
 profile = "black"
 line_length = 100
+include_trailing_comma = true
+use_parentheses = true
+ensure_newline_before_comments = true
+balanced_wrapping = true
+lines_after_imports = 2
 skip_gitignore = true
+known_first_party = ["hard_lint_py"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-# E: pycodestyle errors
-# F: Pyflakes (unused imports)
-# W: pycodestyle warnings
-# I: isort (import sorting)
-# N: pep8-naming
-# C: mccabe complexity
-# B: flake8-bugbear
-# D: pydocstyle (docstrings instead of comments)
-# RUF: Ruff-specific rules
-select = ["E", "F", "W", "I", "N", "C", "B", "RUF"]
-ignore = ["E501", "RUF001"]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # Pyflakes (unused imports)
+    "W",      # pycodestyle warnings
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "C",      # mccabe complexity
+    "B",      # flake8-bugbear
+    "D",      # pydocstyle (enforce docstrings)
+    "RUF",    # Ruff-specific rules
+    "UP",     # pyupgrade (modernize code)
+]
+ignore = [
+    "E501",   # Line too long (Black handles this)
+    "D100",   # Missing module docstring (too strict)
+    "D104",   # Missing package docstring
+    "RUF001", # Ambiguous unicode character (too strict)
+    "D105",   # Missing docstring in magic method
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [tool.ruff.per-file-ignores]
-# Allow various things in tests
+# Tests don't need docstrings
 "tests/*" = ["D", "I001"]
-# Allow missing docstrings in __init__.py
+# Package init is flexible
 "src/hard_lint_py/__init__.py" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=src/hard_lint_py --cov-report=term-missing"
+addopts = "--cov=src/hard_lint_py --cov-report=term-missing --strict-markers"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+]
 
 [tool.mypy]
 python_version = "3.10"

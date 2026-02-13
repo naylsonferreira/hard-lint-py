@@ -143,11 +143,7 @@ def test_ensure_pyproject_config_already_configured():
     with tempfile.TemporaryDirectory() as tmpdir:
         project_dir = Path(tmpdir)
         pyproject_content = (
-            "[tool.poetry]\n"
-            "[tool.ruff]\n"
-            "line-length = 120\n"
-            "[tool.black]\n"
-            "[tool.isort]\n"
+            "[tool.poetry]\n[tool.ruff]\nline-length = 120\n[tool.black]\n[tool.isort]\n"
         )
         pyproject_path = project_dir / "pyproject.toml"
         pyproject_path.write_text(pyproject_content)
