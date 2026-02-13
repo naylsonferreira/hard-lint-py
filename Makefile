@@ -5,6 +5,7 @@ help:
 	@echo ""
 	@echo "  make install       - Install dependencies with Poetry"
 	@echo "  make test          - Run tests with pytest"
+	@echo "  make test-cov      - Run tests with coverage report"
 	@echo "  make lint          - Run linting with ruff"
 	@echo "  make format        - Format code with black and isort"
 	@echo "  make fix           - Fix linting errors automatically"
@@ -23,6 +24,10 @@ dev:
 
 test:
 	poetry run pytest -v tests/
+
+test-cov:
+	poetry run pytest -v tests/ --cov=src/hard_lint_py --cov-report=html --cov-report=term-missing
+	@echo "✓ Coverage report generated in htmlcov/index.html"
 
 lint:
 	poetry run ruff check src/ tests/
