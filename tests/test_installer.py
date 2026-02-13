@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
 from hard_lint_py.installer import HardLintInstaller
 
 
@@ -113,9 +114,7 @@ def test_configure_git_hooks_path_error():
 
         # Mock subprocess.run to raise an error
         def raise_error(*args, **kwargs):
-            raise subprocess.CalledProcessError(
-                1, "git", stderr=b"error message"
-            )
+            raise subprocess.CalledProcessError(1, "git", stderr=b"error message")
 
         with patch("subprocess.run", side_effect=raise_error):
             with pytest.raises(RuntimeError, match="Failed to configure Git"):
