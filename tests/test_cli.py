@@ -2,8 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
-
 from hard_lint_py.cli import main
 
 
