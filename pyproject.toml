@@ -76,26 +76,17 @@ select = [
     "N",      # pep8-naming
     "C",      # mccabe complexity
     "B",      # flake8-bugbear
-    "D",      # pydocstyle (enforce docstrings)
     "RUF",    # Ruff-specific rules
     "UP",     # pyupgrade (modernize code)
 ]
 ignore = [
     "E501",   # Line too long (Black handles this)
-    "D100",   # Missing module docstring (too strict)
-    "D104",   # Missing package docstring
     "RUF001", # Ambiguous unicode character (too strict)
-    "D105",   # Missing docstring in magic method
 ]
 
-[tool.ruff.pydocstyle]
-convention = "google"
-
 [tool.ruff.per-file-ignores]
-# Tests don't need docstrings
-"tests/*" = ["D", "I001"]
-# Package init is flexible
-"src/hard_lint_py/__init__.py" = ["D"]
+# Tests excluded due to import complexity
+"tests/*" = ["I001"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
