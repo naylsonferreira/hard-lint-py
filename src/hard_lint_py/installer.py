@@ -76,10 +76,10 @@ class HardLintInstaller:
             "#!/bin/sh\n"
             'cd "$(git rev-parse --show-toplevel)"\n'
             'MESSAGE=$(cat "$1")\n'
-            "poetry run python -c \"import sys; import re; "
+            'poetry run python -c "import sys; import re; '
             "pattern = r'^(feat|fix|docs|style|refactor|perf|test|chore)'; "
             "msg = '''$MESSAGE'''; "
-            "sys.exit(0 if re.match(pattern, msg) else 1)\"\n"
+            'sys.exit(0 if re.match(pattern, msg) else 1)"\n'
         )
         commit_msg_path = self.hooks_dir / "commit-msg"
         commit_msg_path.write_text(commit_msg_content)

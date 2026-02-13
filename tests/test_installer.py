@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from hard_lint_py.installer import HardLintInstaller
 
 
