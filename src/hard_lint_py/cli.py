@@ -6,13 +6,39 @@ from pathlib import Path
 from hard_lint_py.installer import HardLintInstaller
 
 
+def check_install_status():
+    """Check if hard-lint-py install was run and show warning if not."""
+    hardlint_dir = Path.cwd() / ".hardlint" / "_"
+    if not hardlint_dir.exists():
+        print("WARNING: Pre-commit hooks not installed!")
+        print("Run 'hard-lint-py install' to set up git hooks.")
+        print("(You can still use check/format commands without it)\n")
+
+
 def run_check(paths=None) -> int:
+    check_install_status()
     target_paths = paths if paths else ["."]
     try:
         print(f"Running checks on {target_paths}...")
         subprocess.run(["poetry", "run", "ruff", "check", *target_paths], check=True)
-        subprocess.run(["poetry", "run", "black", "--check", *target_paths], check=True)
-        subprocess.run(["poetry", "run", "isort", "--check-only", *target_paths], check=True)
+        subprocess.run(
+            ["poetry", "run", "black", "--check", "--line-length", "100", *target_paths],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "poetry",
+                "run",
+                "isort",
+                "--check-only",
+                "--profile",
+                "black",
+                "--line-length",
+                "100",
+                *target_paths,
+            ],
+            check=True,
+        )
         print("All checks passed!")
         return 0
     except subprocess.CalledProcessError:
@@ -21,11 +47,26 @@ def run_check(paths=None) -> int:
 
 
 def run_format(paths=None) -> int:
+    check_install_status()
     target_paths = paths if paths else ["."]
     try:
         print(f"Running formatting on {target_paths}...")
-        subprocess.run(["poetry", "run", "black", *target_paths], check=True)
-        subprocess.run(["poetry", "run", "isort", *target_paths], check=True)
+        subprocess.run(
+            ["poetry", "run", "black", "--line-length", "100", *target_paths], check=True
+        )
+        subprocess.run(
+            [
+                "poetry",
+                "run",
+                "isort",
+                "--profile",
+                "black",
+                "--line-length",
+                "100",
+                *target_paths,
+            ],
+            check=True,
+        )
         subprocess.run(["poetry", "run", "ruff", "check", "--fix", *target_paths], check=True)
         print("Formatting complete!")
         return 0
