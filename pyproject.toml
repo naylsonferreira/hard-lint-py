@@ -109,6 +109,7 @@ strict = true
 version_variable = "src/hard_lint_py/__init__.py:__version__"
 version_toml = ["pyproject.toml:project.version"]
 major_on_zero = false
+build_command = "pip install build && python -m build"
 
 [tool.semantic_release.branches.main]
 match = "main"
