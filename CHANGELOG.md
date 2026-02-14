@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v0.2.1 (2026-02-14)
+
+### Fixes
+
+* fix: add build command using python -m build ([`6afc879`](https://github.com/naylsonferreira/hard-lint-py/commit/6afc8790f6a653a1643326e84330ef93c86acea3))
+
+
 ## v0.2.0 (2026-02-14)
 
 ### Features
