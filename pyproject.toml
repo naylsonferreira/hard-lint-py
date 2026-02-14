@@ -1,6 +1,6 @@
 [project]
 name = "hard-lint-py"
-version = "0.1.0"
+version = "0.1.3"
 description = "Rigorous linting and code quality setup for Python projects with pre-commit hooks"
 authors = [
     {name = "Naylson Ferreira", email = "naylsonfsa@gmail.com"}
@@ -48,6 +48,7 @@ pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 coverage = "^7.0.0"
 mypy = "^1.5.0"
+python-semantic-release = "^9.0.0"
 
 [tool.black]
 line-length = 100
@@ -84,6 +85,7 @@ ignore = [
     "E501",   # Line too long (Black handles this)
     "I001",   # Import sorting conflict with isort (let isort handle this)
     "RUF001", # Ambiguous unicode character (too strict)
+    "T201",   # Allow print statements (CLI tool)
 ]
 
 [tool.ruff.per-file-ignores]
@@ -101,6 +103,27 @@ markers = [
 [tool.mypy]
 python_version = "3.10"
 strict = true
+
+
+[tool.semantic_release]
+version_variable = "src/hard_lint_py/__init__.py:__version__"
+version_toml = ["pyproject.toml:project.version"]
+major_on_zero = false
+build_command = "poetry build"
+
+[tool.semantic_release.branches.main]
+match = "main"
+
+[tool.semantic_release.changelog]
+template_dir = "templates"
+exclude_commit_patterns = []
+
+[tool.semantic_release.gatekeeper]
+check_commit_allow_pattern = ""
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

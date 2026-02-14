@@ -33,12 +33,7 @@ class HardLintInstaller:
         (self.pre_commit_dir / ".gitignore").write_text("*")
 
         pre_commit_content = (
-            "#!/bin/sh\n"
-            'cd "$(git rev-parse --show-toplevel)"\n'
-            "poetry run ruff check . --fix && "
-            "poetry run black . --quiet && "
-            "poetry run isort . --quiet && "
-            "python scripts/validate-no-comments.py\n"
+            '#!/bin/sh\ncd "$(git rev-parse --show-toplevel)"\npoetry run hard-lint-py format .\n'
         )
         pre_commit_path = self.hooks_dir / "pre-commit"
         pre_commit_path.write_text(pre_commit_content)
