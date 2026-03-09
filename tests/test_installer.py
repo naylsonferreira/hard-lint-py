@@ -73,9 +73,7 @@ def test_setup_pre_commit_hooks():
 
         # Verify correct content
         pre_commit_content = pre_commit_hook.read_text()
-        assert "poetry run ruff check" in pre_commit_content
-        assert "poetry run black" in pre_commit_content
-        assert "poetry run isort" in pre_commit_content
+        assert "poetry run hard-lint-py format" in pre_commit_content
 
         # Verify commit-msg content
         commit_msg_content = commit_msg_hook.read_text()
