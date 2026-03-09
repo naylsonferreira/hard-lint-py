@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v0.0.1 (2026-03-09)
+
+### Fixes
+
+* fix: correct test expectations for CLI and pre-commit hooks ([`c7c5ad5`](https://github.com/naylsonferreira/hard-lint-py/commit/c7c5ad550ac6af9fb4a0525f86a1c0023e61df34))
+
+
 ## v0.0.0 (2026-03-09)
 
 ### Chores
