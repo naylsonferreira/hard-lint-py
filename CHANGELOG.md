@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v0.1.0 (2026-03-11)
+
+### Features
+
+* feat: add lint config override detection and enforce hooks installation ([`6bb9fb0`](https://github.com/naylsonferreira/hard-lint-py/commit/6bb9fb042451541ca6a27606264397a38db8617b))
+
+
 ## v0.0.1 (2026-03-09)
 
 ### Fixes
