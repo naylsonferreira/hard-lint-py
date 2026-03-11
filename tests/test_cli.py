@@ -1,5 +1,3 @@
-"""Tests for hard-lint-py CLI."""
-
 import sys
 import tempfile
 from pathlib import Path
@@ -11,11 +9,11 @@ from hard_lint_py.cli import (
     main,
     run_check,
     run_format,
+    validate_no_comments_rule,
 )
 
 
 def test_main_success():
-    """Test CLI main function with successful installation."""
     with patch("hard_lint_py.cli.HardLintInstaller") as mock_installer_class:
         with patch.object(sys, "argv", ["hard-lint-py"]):
             mock_instance = mock_installer_class.return_value
@@ -29,7 +27,6 @@ def test_main_success():
 
 
 def test_main_with_error():
-    """Test CLI main function handling errors."""
     with patch("hard_lint_py.cli.HardLintInstaller") as mock_installer_class:
         with patch.object(sys, "argv", ["hard-lint-py"]):
             mock_instance = mock_installer_class.return_value
@@ -43,7 +40,6 @@ def test_main_with_error():
 
 
 def test_main_with_generic_exception():
-    """Test CLI main function with generic exception."""
     with patch("hard_lint_py.cli.HardLintInstaller") as mock_installer_class:
         with patch.object(sys, "argv", ["hard-lint-py"]):
             mock_instance = mock_installer_class.return_value
@@ -56,7 +52,6 @@ def test_main_with_generic_exception():
 
 
 def test_main_cwd_argument():
-    """Test that main uses current working directory."""
     with patch("hard_lint_py.cli.HardLintInstaller") as mock_installer_class:
         with patch.object(sys, "argv", ["hard-lint-py"]):
             with patch("hard_lint_py.cli.Path.cwd") as mock_cwd:
@@ -67,12 +62,10 @@ def test_main_cwd_argument():
                 main()
 
                 mock_cwd.assert_called_once()
-                # Verify HardLintInstaller was called with current directory
                 mock_installer_class.assert_called_once()
 
 
 def test_main_lint_command_dispatch():
-    """CLI must dispatch lint subcommand to run_lint."""
     with patch("hard_lint_py.cli.run_lint", return_value=0) as mock_run_lint:
         with patch.object(sys, "argv", ["hard-lint-py", "lint", "src"]):
             result = main()
@@ -82,7 +75,6 @@ def test_main_lint_command_dispatch():
 
 
 def test_main_check_alias_dispatches_to_lint():
-    """check subcommand remains as a compatibility alias to lint."""
     with patch("hard_lint_py.cli.run_lint", return_value=0) as mock_run_lint:
         with patch.object(sys, "argv", ["hard-lint-py", "check", "src"]):
             result = main()
@@ -92,7 +84,6 @@ def test_main_check_alias_dispatches_to_lint():
 
 
 def test_find_docstrings_in_src_detects_docstring():
-    """Docstrings must be detected so they can be rejected by validation."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         src_dir = tmp_path / "src"
@@ -109,7 +100,6 @@ def test_find_docstrings_in_src_detects_docstring():
 
 
 def test_find_comments_in_src_does_not_flag_docstring_as_comment():
-    """Docstrings are not hash comments and should not appear in comment detector."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         src_dir = tmp_path / "src"
@@ -125,7 +115,6 @@ def test_find_comments_in_src_does_not_flag_docstring_as_comment():
 
 
 def test_run_check_fails_when_comments_exist():
-    """run_check must fail if src/ contains hash-style comments."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         src_dir = tmp_path / "src"
@@ -141,7 +130,6 @@ def test_run_check_fails_when_comments_exist():
 
 
 def test_run_format_fails_when_comments_exist():
-    """run_format must fail if src/ contains hash-style comments."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         src_dir = tmp_path / "src"
@@ -157,7 +145,6 @@ def test_run_format_fails_when_comments_exist():
 
 
 def test_run_check_fails_when_docstring_exists():
-    """run_check must fail if src/ contains docstrings."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir)
         src_dir = tmp_path / "src"
@@ -170,3 +157,52 @@ def test_run_check_fails_when_docstring_exists():
             result = run_check(["src"])
 
         assert result == 1
+
+
+def test_validate_rule_respects_src_scope():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        tests_dir = tmp_path / "tests"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        tests_dir.mkdir(parents=True, exist_ok=True)
+
+        (src_dir / "module.py").write_text('def run() -> str:\n    return "ok"\n')
+        (tests_dir / "test_module.py").write_text(
+            "def test_run() -> None:\n    # only in tests\n    assert True\n"
+        )
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = validate_no_comments_rule(["src"])
+
+        assert result == 0
+
+
+def test_validate_rule_respects_tests_scope():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir(parents=True, exist_ok=True)
+
+        (tests_dir / "test_module.py").write_text(
+            "def test_run() -> None:\n    # not allowed\n    assert True\n"
+        )
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = validate_no_comments_rule(["tests"])
+
+        assert result == 1
+
+
+def test_validate_rule_respects_gitignore():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (tmp_path / ".gitignore").write_text("src/\n")
+        (src_dir / "module.py").write_text('def run() -> str:\n    # ignored\n    return "ok"\n')
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = validate_no_comments_rule(["."])
+
+        assert result == 0

@@ -7,17 +7,89 @@ import tokenize
 import tomllib
 from pathlib import Path
 
+from pathspec import PathSpec
+
 from hard_lint_py.installer import HardLintInstaller
 
 
-def find_comments_in_src() -> list[tuple[Path, int, str]]:
-    src_path = Path.cwd() / "src"
-    if not src_path.exists():
-        return []
+IGNORED_PATH_PARTS = {
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".mypy_cache",
+    "build",
+    "dist",
+    ".hardlint",
+}
 
+
+def _resolve_validation_targets(paths: list[str] | None) -> list[Path]:
+    target_paths = paths if paths else ["src"]
+    resolved: list[Path] = []
+
+    for raw_path in target_paths:
+        path = Path(raw_path)
+        candidate = path if path.is_absolute() else (Path.cwd() / path)
+        if candidate.exists():
+            resolved.append(candidate)
+
+    return resolved
+
+
+def _load_gitignore_spec() -> PathSpec | None:
+    gitignore = Path.cwd() / ".gitignore"
+    if not gitignore.exists():
+        return None
+
+    lines = gitignore.read_text().splitlines()
+    return PathSpec.from_lines("gitignore", lines)
+
+
+def _is_path_ignored(path: Path) -> bool:
+    if any(part in IGNORED_PATH_PARTS for part in path.parts):
+        return True
+
+    spec = _load_gitignore_spec()
+    if spec is None:
+        return False
+
+    try:
+        relative = path.resolve().relative_to(Path.cwd().resolve())
+    except ValueError:
+        return False
+
+    return spec.match_file(relative.as_posix())
+
+
+def _iter_python_files(paths: list[str] | None):
+    seen: set[Path] = set()
+
+    for target in _resolve_validation_targets(paths):
+        if target.is_file():
+            if target.suffix == ".py" and not _is_path_ignored(target):
+                normalized = target.resolve()
+                if normalized not in seen:
+                    seen.add(normalized)
+                    yield normalized
+            continue
+
+        for py_file in target.rglob("*.py"):
+            if _is_path_ignored(py_file):
+                continue
+            normalized = py_file.resolve()
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            yield normalized
+
+
+def find_comments_in_src(paths: list[str] | None = None) -> list[tuple[Path, int, str]]:
     found: list[tuple[Path, int, str]] = []
 
-    for py_file in src_path.rglob("*.py"):
+    for py_file in _iter_python_files(paths):
         content = py_file.read_text()
         try:
             tokens = tokenize.generate_tokens(io.StringIO(content).readline)
@@ -56,14 +128,10 @@ def _collect_docstrings_from_node(node: ast.AST, file_path: Path) -> list[tuple[
     return found
 
 
-def find_docstrings_in_src() -> list[tuple[Path, int, str]]:
-    src_path = Path.cwd() / "src"
-    if not src_path.exists():
-        return []
-
+def find_docstrings_in_src(paths: list[str] | None = None) -> list[tuple[Path, int, str]]:
     found: list[tuple[Path, int, str]] = []
 
-    for py_file in src_path.rglob("*.py"):
+    for py_file in _iter_python_files(paths):
         content = py_file.read_text()
         try:
             module = ast.parse(content)
@@ -74,9 +142,9 @@ def find_docstrings_in_src() -> list[tuple[Path, int, str]]:
     return found
 
 
-def validate_no_comments_rule() -> int:
-    comments = find_comments_in_src()
-    docstrings = find_docstrings_in_src()
+def validate_no_comments_rule(paths: list[str] | None = None) -> int:
+    comments = find_comments_in_src(paths)
+    docstrings = find_docstrings_in_src(paths)
     if not comments and not docstrings:
         return 0
 
@@ -143,9 +211,9 @@ def run_lint(paths=None) -> int:
         return 1
     if check_install_status() != 0:
         return 1
-    if validate_no_comments_rule() != 0:
-        return 1
     target_paths = paths if paths else ["."]
+    if validate_no_comments_rule(target_paths) != 0:
+        return 1
     try:
         print(f"Running checks on {target_paths}...")
         subprocess.run(["poetry", "run", "ruff", "check", *target_paths], check=True)
@@ -179,9 +247,9 @@ def run_format(paths=None) -> int:
         return 1
     if check_install_status() != 0:
         return 1
-    if validate_no_comments_rule() != 0:
-        return 1
     target_paths = paths if paths else ["."]
+    if validate_no_comments_rule(target_paths) != 0:
+        return 1
     try:
         print(f"Running formatting on {target_paths}...")
         subprocess.run(
