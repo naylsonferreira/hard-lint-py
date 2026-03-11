@@ -1,22 +1,67 @@
 import argparse
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 from hard_lint_py.installer import HardLintInstaller
 
 
-def check_install_status():
-    """Check if hard-lint-py install was run and show warning if not."""
+def check_lint_config_override() -> int:
+    """Check if project has lint config overrides that conflict with hard-lint-py."""
+    is_hard_lint_py_repo = (Path.cwd() / "src" / "hard_lint_py" / "cli.py").exists()
+    if is_hard_lint_py_repo:
+        return 0
+
+    pyproject = Path.cwd() / "pyproject.toml"
+
+    if not pyproject.exists():
+        return 0
+
+    try:
+        with open(pyproject, "rb") as f:
+            config = tomllib.load(f)
+    except Exception:
+        return 0
+
+    tool_config = config.get("tool", {})
+    forbidden_configs = ["ruff", "black", "isort", "pylint", "flake8"]
+    found_configs = [c for c in forbidden_configs if c in tool_config]
+
+    if found_configs:
+        print(f"ERROR: Project has lint configuration overrides: {', '.join(found_configs)}")
+        print(
+            "Hard-lint-py manages all lint configurations. Remove these sections from"
+            " pyproject.toml"
+        )
+        return 1
+
+    config_files = [".flake8", ".pylintrc", "setup.cfg", "tox.ini"]
+    found_files = [f for f in config_files if Path.cwd().joinpath(f).exists()]
+
+    if found_files:
+        print(f"ERROR: Project has lint configuration files: {', '.join(found_files)}")
+        print("Hard-lint-py manages all lint configurations. Remove these files.")
+        return 1
+
+    return 0
+
+
+def check_install_status() -> int:
+    """Check if hard-lint-py install was run and raise error if not."""
     hardlint_dir = Path.cwd() / ".hardlint" / "_"
     if not hardlint_dir.exists():
-        print("WARNING: Pre-commit hooks not installed!")
+        print("ERROR: Pre-commit hooks not installed!")
         print("Run 'hard-lint-py install' to set up git hooks.")
-        print("(You can still use check/format commands without it)\n")
+        return 1
+    return 0
 
 
 def run_check(paths=None) -> int:
-    check_install_status()
+    if check_lint_config_override() != 0:
+        return 1
+    if check_install_status() != 0:
+        return 1
     target_paths = paths if paths else ["."]
     try:
         print(f"Running checks on {target_paths}...")
@@ -47,7 +92,10 @@ def run_check(paths=None) -> int:
 
 
 def run_format(paths=None) -> int:
-    check_install_status()
+    if check_lint_config_override() != 0:
+        return 1
+    if check_install_status() != 0:
+        return 1
     target_paths = paths if paths else ["."]
     try:
         print(f"Running formatting on {target_paths}...")
@@ -76,6 +124,10 @@ def run_format(paths=None) -> int:
 
 
 def run_verify(paths=None) -> int:
+    if check_lint_config_override() != 0:
+        return 1
+    if check_install_status() != 0:
+        return 1
     try:
         print("Running verification (lint + tests)...")
         if run_check(paths) != 0:

@@ -6,7 +6,7 @@ authors = [
     {name = "Naylson Ferreira", email = "naylsonfsa@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = {text = "MIT"}
 keywords = ["linting", "pre-commit", "code-quality", "ruff", "black", "isort", "coverage"]
 classifiers = [
@@ -14,8 +14,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
@@ -37,7 +35,7 @@ hard-lint-py = "hard_lint_py.cli:main"
 packages = [{include = "hard_lint_py", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 ruff = "^0.1.0"
 black = "^23.0.0"
 isort = "^5.12.0"
@@ -52,7 +50,7 @@ python-semantic-release = "^9.0.0"
 
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311", "py312"]
+target-version = ["py312"]
 preview = true
 
 [tool.isort]
@@ -68,7 +66,7 @@ known_first_party = ["hard_lint_py"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py312"
 select = [
     "E",      # pycodestyle errors
     "F",      # Pyflakes (unused imports)
@@ -101,7 +99,7 @@ markers = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 strict = true
 
 
