@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v0.3.0 (2026-03-11)
+
+### Features
+
+* feat: respect gitignore patterns in custom validation ([`ec20cf0`](https://github.com/naylsonferreira/hard-lint-py/commit/ec20cf0ec6ff9a48c862ea47c3bf4d0dbb1dcfed))
+
+
 ## v0.2.4 (2026-03-11)
 
 ### Fixes
