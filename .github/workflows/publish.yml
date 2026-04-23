@@ -25,9 +25,7 @@ jobs:
           python-version: "3.14"
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
+        run: pipx install poetry
 
       - name: Build package
         run: poetry build
@@ -62,9 +60,7 @@ jobs:
           python-version: "3.14"
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
+        run: pipx install poetry
 
       - name: Python Semantic Release
         id: release
