@@ -49,12 +49,20 @@ Hooks are created in `.hardlint/_/`:
   - Formats with `black`
   - Sorts imports with `isort`
   - Validates no comments exist
+  - Enforces empty `__init__.py` files
 
 - **commit-msg**: Validates commit messages
   - Must follow Conventional Commits format
   - Examples: `feat:`, `fix:`, `chore:`, `docs:`, etc.
 
 ## Linting Rules
+
+### Custom Rules
+
+| Rule | Description |
+|------|-------------|
+| **no-comments** | Forbids inline comments and docstrings in all Python files |
+| **empty-init** | `__init__.py` files must be completely empty (no imports, no code) |
 
 ### Ruff Rules Enforced
 
@@ -77,7 +85,7 @@ All three formatters (Ruff, Black, isort) use the **same profile** to prevent co
 | Aspect | Configuration | Notes |
 |--------|---------------|-------|
 | **Line Length** | 100 characters | Consistent across all tools |
-| **Python Version** | 3.10+ | Targets modern Python |
+| **Python Version** | 3.14+ | Targets modern Python |
 | **Imports Profile** | `isort: black` | Compatible with Black |
 | **Trailing Commas** | Enabled | Multi-line consistency |
 
@@ -88,7 +96,7 @@ Auto-configured in `pyproject.toml`:
 ```toml
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311", "py312"]
+target-version = ["py314"]
 
 [tool.isort]
 profile = "black"           # Compatible with Black
@@ -97,7 +105,7 @@ known_first_party = ["hard_lint_py"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py314"
 select = ["E", "F", "W", "I", "N", "C", "B", "RUF", "UP"]
 ```
 
@@ -194,9 +202,7 @@ hard-lint-py
 
 ## Supported Python Versions
 
-- Python 3.10+
-- Python 3.11
-- Python 3.12
+- Python 3.14+
 
 ## Development
 
@@ -227,6 +233,7 @@ poetry run isort --check-only src/ tests/
 ### Quality Standards
 - ✅ 99% code coverage
 - ✅ No unused imports or variables
+- ✅ Empty `__init__.py` files
 - ✅ Consistent formatting (100 char lines)
 - ✅ Code complexity within limits
 - ✅ Modern Python syntax
