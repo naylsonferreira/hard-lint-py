@@ -1,5 +1,7 @@
 # Hard-Lint for Python 🐍
 
+[![PyPI version](https://img.shields.io/pypi/v/hard-lint-py)](https://pypi.org/project/hard-lint-py/)
+
 Rigorous linting and code quality setup for Python projects with automatic pre-commit hooks.
 
 ## Features
