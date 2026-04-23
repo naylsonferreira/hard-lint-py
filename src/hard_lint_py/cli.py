@@ -142,6 +142,30 @@ def find_docstrings_in_src(paths: list[str] | None = None) -> list[tuple[Path, i
     return found
 
 
+def find_non_empty_init_files(paths: list[str] | None = None) -> list[Path]:
+    found: list[Path] = []
+
+    for py_file in _iter_python_files(paths):
+        if py_file.name != "__init__.py":
+            continue
+        if py_file.read_text().strip():
+            found.append(py_file)
+
+    return found
+
+
+def validate_empty_init_files(paths: list[str] | None = None) -> int:
+    violations = find_non_empty_init_files(paths)
+    if not violations:
+        return 0
+
+    for py_file in violations:
+        print(f"{py_file}: __init__.py must be empty")
+
+    print("\nFound non-empty __init__.py files. They must be kept empty!", file=sys.stderr)
+    return 1
+
+
 def validate_no_comments_rule(paths: list[str] | None = None) -> int:
     comments = find_comments_in_src(paths)
     docstrings = find_docstrings_in_src(paths)
@@ -214,6 +238,8 @@ def run_lint(paths=None) -> int:
     target_paths = paths if paths else ["."]
     if validate_no_comments_rule(target_paths) != 0:
         return 1
+    if validate_empty_init_files(target_paths) != 0:
+        return 1
     try:
         print(f"Running checks on {target_paths}...")
         subprocess.run(["poetry", "run", "ruff", "check", *target_paths], check=True)
@@ -249,6 +275,8 @@ def run_format(paths=None) -> int:
         return 1
     target_paths = paths if paths else ["."]
     if validate_no_comments_rule(target_paths) != 0:
+        return 1
+    if validate_empty_init_files(target_paths) != 0:
         return 1
     try:
         print(f"Running formatting on {target_paths}...")

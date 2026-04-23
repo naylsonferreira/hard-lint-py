@@ -6,9 +6,11 @@ from unittest.mock import patch
 from hard_lint_py.cli import (
     find_comments_in_src,
     find_docstrings_in_src,
+    find_non_empty_init_files,
     main,
     run_check,
     run_format,
+    validate_empty_init_files,
     validate_no_comments_rule,
 )
 
@@ -190,6 +192,84 @@ def test_validate_rule_respects_tests_scope():
 
         with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
             result = validate_no_comments_rule(["tests"])
+
+        assert result == 1
+
+
+def test_find_non_empty_init_files_detects_content():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("from .module import something\n")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = find_non_empty_init_files(["src"])
+
+        assert len(result) == 1
+
+
+def test_find_non_empty_init_files_allows_empty():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = find_non_empty_init_files(["src"])
+
+        assert result == []
+
+
+def test_find_non_empty_init_files_allows_whitespace_only():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("\n\n")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = find_non_empty_init_files(["src"])
+
+        assert result == []
+
+
+def test_validate_empty_init_files_returns_1_on_violation():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("x = 1\n")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = validate_empty_init_files(["src"])
+
+        assert result == 1
+
+
+def test_validate_empty_init_files_returns_0_when_clean():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = validate_empty_init_files(["src"])
+
+        assert result == 0
+
+
+def test_run_check_fails_when_init_has_content():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        (src_dir / "__init__.py").write_text("from .module import something\n")
+
+        with patch("hard_lint_py.cli.Path.cwd", return_value=tmp_path):
+            result = run_check(["src"])
 
         assert result == 1
 
