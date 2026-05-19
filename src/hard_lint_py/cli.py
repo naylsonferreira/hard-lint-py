@@ -11,7 +11,6 @@ from pathspec import PathSpec
 
 from hard_lint_py.installer import HardLintInstaller
 
-
 IGNORED_PATH_PARTS = {
     ".git",
     ".venv",
@@ -166,25 +165,8 @@ def validate_empty_init_files(paths: list[str] | None = None) -> int:
     return 1
 
 
-def validate_no_comments_rule(paths: list[str] | None = None) -> int:
-    comments = find_comments_in_src(paths)
-    docstrings = find_docstrings_in_src(paths)
-    if not comments and not docstrings:
-        return 0
-
-    for py_file, line_num, comment in comments:
-        print(f"{py_file}:{line_num}: {comment}")
-
-    for py_file, line_num, doc in docstrings:
-        print(f"{py_file}:{line_num}: docstring -> {doc}")
-
-    print("\nFound comments/docstrings in code. Remove them!", file=sys.stderr)
-    return 1
-
-
 def check_lint_config_override() -> int:
-    is_hard_lint_py_repo = (Path.cwd() / "src" / "hard_lint_py" / "cli.py").exists()
-    if is_hard_lint_py_repo:
+    if (Path.cwd() / "src" / "hard_lint_py" / "cli.py").exists():
         return 0
 
     pyproject = Path.cwd() / "pyproject.toml"
@@ -203,10 +185,10 @@ def check_lint_config_override() -> int:
     found_configs = [c for c in forbidden_configs if c in tool_config]
 
     if found_configs:
-        print(f"ERROR: Project has lint configuration overrides: {', '.join(found_configs)}")
+        print(f"ERROR: Project has custom lint configuration: {', '.join(found_configs)}")
         print(
-            "Hard-lint-py manages all lint configurations. Remove these sections from"
-            " pyproject.toml"
+            "hard-lint-py manages all lint configurations. Remove these sections from"
+            " pyproject.toml."
         )
         return 1
 
@@ -214,11 +196,27 @@ def check_lint_config_override() -> int:
     found_files = [f for f in config_files if Path.cwd().joinpath(f).exists()]
 
     if found_files:
-        print(f"ERROR: Project has lint configuration files: {', '.join(found_files)}")
-        print("Hard-lint-py manages all lint configurations. Remove these files.")
+        print(f"ERROR: Project has custom lint configuration files: {', '.join(found_files)}")
+        print("hard-lint-py manages all lint configurations. Remove these files.")
         return 1
 
     return 0
+
+
+def validate_no_comments_rule(paths: list[str] | None = None) -> int:
+    comments = find_comments_in_src(paths)
+    docstrings = find_docstrings_in_src(paths)
+    if not comments and not docstrings:
+        return 0
+
+    for py_file, line_num, comment in comments:
+        print(f"{py_file}:{line_num}: {comment}")
+
+    for py_file, line_num, doc in docstrings:
+        print(f"{py_file}:{line_num}: docstring -> {doc}")
+
+    print("\nFound comments/docstrings in code. Remove them!", file=sys.stderr)
+    return 1
 
 
 def check_install_status() -> int:

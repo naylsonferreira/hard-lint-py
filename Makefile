@@ -35,6 +35,7 @@ lint:
 format:
 	poetry run black src/ tests/
 	poetry run isort src/ tests/
+	poetry run ruff check src/ tests/ --fix
 
 fix:
 	poetry run ruff check src/ tests/ --fix

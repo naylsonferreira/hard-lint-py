@@ -21,7 +21,7 @@ def test_installer_requires_pyproject():
         (project_dir / ".git").mkdir()
 
         installer = HardLintInstaller(project_dir)
-        with pytest.raises(RuntimeError, match="pyproject.toml not found"):
+        with pytest.raises(RuntimeError, match=r"pyproject\.toml not found"):
             installer.install()
 
 
@@ -66,7 +66,8 @@ def test_setup_pre_commit_hooks():
         assert "poetry run hard-lint-py format" in pre_commit_content
 
         commit_msg_content = commit_msg_hook.read_text()
-        assert "feat" in commit_msg_content or "fix" in commit_msg_content
+        assert "gitlint" in commit_msg_content
+        assert "--msg-filename" in commit_msg_content
 
 
 def test_configure_git_hooks_path():
@@ -103,36 +104,19 @@ def test_configure_git_hooks_path_error():
                 installer._configure_git_hooks_path()
 
 
-def test_ensure_pyproject_config():
+def test_setup_gitlint_config():
     with tempfile.TemporaryDirectory() as tmpdir:
         project_dir = Path(tmpdir)
-        pyproject_path = project_dir / "pyproject.toml"
-        pyproject_path.write_text("[tool.poetry]\nname = 'test'\n")
-
         installer = HardLintInstaller(project_dir)
-        installer._ensure_pyproject_config()
+        installer.pre_commit_dir.mkdir(parents=True, exist_ok=True)
 
-        content = pyproject_path.read_text()
-        assert "[tool.ruff]" in content
-        assert "[tool.black]" in content
-        assert "[tool.isort]" in content
-        assert "line-length = 100" in content
+        installer._setup_gitlint_config()
 
-
-def test_ensure_pyproject_config_already_configured():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        project_dir = Path(tmpdir)
-        pyproject_content = (
-            "[tool.poetry]\n[tool.ruff]\nline-length = 120\n[tool.black]\n[tool.isort]\n"
-        )
-        pyproject_path = project_dir / "pyproject.toml"
-        pyproject_path.write_text(pyproject_content)
-
-        installer = HardLintInstaller(project_dir)
-        installer._ensure_pyproject_config()
-
-        content = pyproject_path.read_text()
-        assert "line-length = 120" in content
+        gitlint_config = project_dir / ".hardlint" / "gitlint"
+        assert gitlint_config.exists()
+        content = gitlint_config.read_text()
+        assert "[title-match-regex]" in content
+        assert "feat|fix" in content
 
 
 def test_full_installation():
@@ -148,3 +132,4 @@ def test_full_installation():
 
         assert (project_dir / ".hardlint" / "_" / "pre-commit").exists()
         assert (project_dir / ".hardlint" / "_" / "commit-msg").exists()
+        assert (project_dir / ".hardlint" / "gitlint").exists()
