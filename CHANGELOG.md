@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v0.4.1 (2026-05-19)
+
+### Fixes
+
+* fix: corrigir incoerências e atualizar deps para py314
+
+- Remove pip install do README (só poetry add -D funciona)
+- Remove _ensure_pyproject_config: installer não escreve no
+  projeto do usuário
+- Restaura check_lint_config_override com auto-exclusão
+- Adiciona pathspec às deps declaradas (estava sem declarar)
+- Adiciona gitlint e substitui regex manual no commit-msg hook
+- Atualiza ruff>=0.15, black>=26.1, isort>=8.0, pre-commit>=4.0
+- Atualiza deps de dev: pytest^9, mypy^2.1, semantic-release^10
+- Corrige target-version para py314 em black e ruff
+- Move select/ignore para [tool.ruff.lint]
+- Remove opções do isort que conflitavam com profile=black
+- Adiciona ruff --fix ao make format
+- Corrige RUF043: raw string no match= do pytest
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com> ([`8f7b054`](https://github.com/naylsonferreira/hard-lint-py/commit/8f7b054ecffbb93c82352976014e8cbc67393e26))
+
+### Unknown
+
+* Merge pull request #10 from naylsonferreira/fix-install
+
+fix: corrigir incoerências e atualizar deps para py314 ([`c606f36`](https://github.com/naylsonferreira/hard-lint-py/commit/c606f36424af04c234587c6d42ca3e3934e4d940))
+
+
 ## v0.4.0 (2026-04-23)
 
 ### Continuous Integration
