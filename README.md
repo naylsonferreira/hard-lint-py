@@ -16,8 +16,6 @@ Rigorous linting and code quality setup for Python projects with automatic pre-c
 ## Installation
 
 ```bash
-pip install hard-lint-py
-# or with poetry
 poetry add -D hard-lint-py
 ```
 
@@ -36,7 +34,7 @@ That's it! Your project now has:
 - **Ruff** for fast Python linting
 - **Black** for code formatting
 - **isort** for import sorting
-- **Commitlint** for commit message validation
+- **Gitlint** for commit message validation (Conventional Commits format)
 
 ## What Gets Installed
 
@@ -57,7 +55,7 @@ Hooks are created in `.hardlint/_/`:
 
 ## Linting Rules
 
-### Custom Rules
+### Custom Rules (enforced by hard-lint-py, not by Ruff)
 
 | Rule | Description |
 |------|-------------|
@@ -106,6 +104,8 @@ known_first_party = ["hard_lint_py"]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "C", "B", "RUF", "UP"]
 ```
 
@@ -168,6 +168,8 @@ All tools read from `pyproject.toml`. Customize as needed:
 ```toml
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
 select = ["E", "F", "W"]
 
 [tool.black]

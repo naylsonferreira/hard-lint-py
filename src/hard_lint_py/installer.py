@@ -18,8 +18,8 @@ class HardLintInstaller:
             raise RuntimeError("pyproject.toml not found in project root")
 
         self._setup_pre_commit_hooks()
+        self._setup_gitlint_config()
         self._configure_git_hooks_path()
-        self._ensure_pyproject_config()
 
     def _check_git_repo(self) -> bool:
         return self.git_dir.exists()
@@ -42,15 +42,20 @@ class HardLintInstaller:
         commit_msg_content = (
             "#!/bin/sh\n"
             'cd "$(git rev-parse --show-toplevel)"\n'
-            'MESSAGE=$(cat "$1")\n'
-            'poetry run python -c "import sys; import re; '
-            "pattern = r'^(feat|fix|docs|style|refactor|perf|test|chore)'; "
-            "msg = '''$MESSAGE'''; "
-            'sys.exit(0 if re.match(pattern, msg) else 1)"\n'
+            'poetry run gitlint --config .hardlint/gitlint --msg-filename "$1"\n'
         )
         commit_msg_path = self.hooks_dir / "commit-msg"
         commit_msg_path.write_text(commit_msg_content)
         commit_msg_path.chmod(0o755)
+
+    def _setup_gitlint_config(self) -> None:
+        gitlint_config = (
+            "[general]\n"
+            "\n"
+            "[title-match-regex]\n"
+            "regex=^(feat|fix|docs|style|refactor|perf|test|chore)(\\(.+\\))?: .+\n"
+        )
+        (self.pre_commit_dir / "gitlint").write_text(gitlint_config)
 
     def _configure_git_hooks_path(self) -> None:
         try:
@@ -62,23 +67,3 @@ class HardLintInstaller:
             )
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to configure Git: {e.stderr.decode()}") from e
-
-    def _ensure_pyproject_config(self) -> None:
-        pyproject_content = self.pyproject_path.read_text()
-
-        if "[tool.ruff]" not in pyproject_content:
-            pyproject_content += "\n[tool.ruff]\n"
-            pyproject_content += "line-length = 100\n"
-            pyproject_content += 'target-version = "py310"\n'
-            pyproject_content += 'select = ["E", "F", "W", "I", "N", "C", "B"]\n'
-
-        if "[tool.black]" not in pyproject_content:
-            pyproject_content += "\n[tool.black]\n"
-            pyproject_content += "line-length = 100\n"
-
-        if "[tool.isort]" not in pyproject_content:
-            pyproject_content += "\n[tool.isort]\n"
-            pyproject_content += 'profile = "black"\n'
-            pyproject_content += "line_length = 100\n"
-
-        self.pyproject_path.write_text(pyproject_content)

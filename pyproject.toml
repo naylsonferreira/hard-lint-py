@@ -17,10 +17,12 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "ruff>=0.1.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "pre-commit>=3.0.0",
+    "ruff>=0.15.0",
+    "black>=26.1.0",
+    "isort>=8.0.0",
+    "pre-commit>=4.0.0",
+    "pathspec>=1.1.0",
+    "gitlint>=0.19.0",
 ]
 
 [project.urls]
@@ -36,37 +38,36 @@ packages = [{include = "hard_lint_py", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.14"
-ruff = "^0.1.0"
-black = "^23.0.0"
-isort = "^5.12.0"
-pre-commit = "^3.0.0"
+ruff = "^0.15.0"
+black = "^26.1.0"
+isort = "^8.0.0"
+pre-commit = "^4.0.0"
+pathspec = "^1.1.0"
+gitlint = "^0.19.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-pytest-cov = "^4.1.0"
-coverage = "^7.0.0"
-mypy = "^1.5.0"
-python-semantic-release = "^9.0.0"
+pytest = "^9.0.0"
+pytest-cov = "^7.0.0"
+coverage = "^7.14.0"
+mypy = "^2.1.0"
+python-semantic-release = "^10.0.0"
 
 [tool.black]
 line-length = 100
-target-version = ["py312"]
+target-version = ["py314"]
 preview = true
 
 [tool.isort]
 profile = "black"
 line_length = 100
-include_trailing_comma = true
-use_parentheses = true
-ensure_newline_before_comments = true
-balanced_wrapping = true
-lines_after_imports = 2
 skip_gitignore = true
 known_first_party = ["hard_lint_py"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py314"
+
+[tool.ruff.lint]
 select = [
     "E",      # pycodestyle errors
     "F",      # Pyflakes (unused imports)
@@ -86,8 +87,7 @@ ignore = [
     "T201",   # Allow print statements (CLI tool)
 ]
 
-[tool.ruff.per-file-ignores]
-# Tests excluded due to import complexity
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["I001"]
 
 [tool.pytest.ini_options]
@@ -99,7 +99,7 @@ markers = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = true
 
 
